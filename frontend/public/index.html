@@ -1,0 +1,186 @@
+<!-- frontend/public/index.html (직접 확인 방식) -->
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#667eea" />
+    <meta name="description" content="도로 유지보수 관리 시스템 - YOLO 기반 AI 균열 검출" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <title>도로 유지보수 관리 시스템</title>
+  </head>
+  <body>
+    <noscript>JavaScript를 활성화해야 이 앱을 실행할 수 있습니다.</noscript>
+    <div id="root"></div>
+    
+    <!-- 디버깅용 스크립트 -->
+    <script>
+      console.log('🚀 페이지 로드 시작');
+      
+      // 전역 상태 관리
+      window.naverMapReady = false;
+      window.naverMapCallbacks = [];
+      
+      // API 상태 확인 함수
+      window.checkNaverAPI = function() {
+        console.log('🔍 네이버 API 상태 확인:');
+        console.log('  - window.naver:', typeof window.naver);
+        console.log('  - window.naver.maps:', typeof window.naver?.maps);
+        console.log('  - window.naver.maps.Map:', typeof window.naver?.maps?.Map);
+        
+        if (window.naver?.maps?.Map) {
+          console.log('  ✅ 모든 필수 객체 사용 가능');
+          return true;
+        } else {
+          console.log('  ❌ 필수 객체 없음');
+          return false;
+        }
+      };
+      
+      // 강제 API 준비 완료 처리
+      window.forceNaverReady = function() {
+        console.log('🔧 강제 API 준비 완료 처리');
+        window.naverMapReady = true;
+        window.dispatchEvent(new CustomEvent('naverMapReady'));
+        
+        // 대기 중인 콜백들 실행
+        window.naverMapCallbacks.forEach(callback => {
+          try {
+            callback();
+          } catch (error) {
+            console.error('콜백 실행 오류:', error);
+          }
+        });
+        window.naverMapCallbacks = [];
+      };
+      
+      // 콜백 등록 함수
+      window.onNaverMapReady = function(callback) {
+        if (window.naverMapReady) {
+          callback();
+        } else {
+          window.naverMapCallbacks.push(callback);
+        }
+      };
+      
+      // 테스트 함수
+      window.testNaverMap = function() {
+        console.log('🧪 네이버 지도 테스트 시작');
+        window.checkNaverAPI();
+        
+        if (window.naver?.maps?.Map) {
+          const testDiv = document.createElement('div');
+          testDiv.id = 'test-map-container';
+          testDiv.style.cssText = 'width:250px;height:200px;position:fixed;top:10px;right:10px;z-index:9999;border:3px solid red;background:white;';
+          document.body.appendChild(testDiv);
+          
+          try {
+            const testMap = new window.naver.maps.Map('test-map-container', {
+              center: new window.naver.maps.LatLng(37.3595704, 127.105399),
+              zoom: 15
+            });
+            console.log('✅ 테스트 지도 생성 성공!');
+            console.log('테스트 지도 객체:', testMap);
+            
+            setTimeout(() => {
+              if (document.body.contains(testDiv)) {
+                document.body.removeChild(testDiv);
+              }
+              console.log('🧪 테스트 완료');
+            }, 4000);
+            
+          } catch (error) {
+            console.error('❌ 테스트 지도 생성 실패:', error);
+            if (document.body.contains(testDiv)) {
+              document.body.removeChild(testDiv);
+            }
+          }
+        } else {
+          console.error('❌ 네이버 지도 API 객체가 준비되지 않았습니다.');
+        }
+      };
+      
+      // 인증 실패 처리
+      window.navermap_authFailure = function () {
+        console.error('❌ 네이버 지도 API 인증 실패');
+        alert('네이버 지도 API 인증에 실패했습니다.\n\nAPI 키: 9j0o3701nw\n확인 필요 사항:\n1. API 키 유효성\n2. 도메인 등록\n3. 사용량 제한');
+      };
+      
+      // API 초기화 콜백 (스크립트에서 호출)
+      window.initNaverMaps = function() {
+        console.log('🎯 initNaverMaps 콜백 함수 호출됨!');
+        window.checkNaverAPI();
+        
+        if (window.naver?.maps?.Map) {
+          console.log('✅ 네이버 지도 API 초기화 완료!');
+          window.forceNaverReady();
+        } else {
+          console.error('❌ initNaverMaps 호출되었지만 API 객체 없음');
+        }
+      };
+      
+      // 페이지 로드 완료 후 API 상태 확인
+      window.addEventListener('load', function() {
+        console.log('📄 페이지 로드 완료');
+        
+        // 1초 후 API 상태 확인
+        setTimeout(() => {
+          console.log('⏰ 1초 후 API 상태 확인');
+          window.checkNaverAPI();
+          
+          if (window.naver?.maps?.Map) {
+            console.log('🎉 API 자동 감지 성공!');
+            window.forceNaverReady();
+          }
+        }, 1000);
+        
+        // 3초 후 재확인
+        setTimeout(() => {
+          console.log('⏰ 3초 후 API 재확인');
+          if (!window.naverMapReady) {
+            window.checkNaverAPI();
+            if (window.naver?.maps?.Map) {
+              console.log('🔄 지연된 API 감지 성공!');
+              window.forceNaverReady();
+            } else {
+              console.error('❌ 3초 후에도 API 없음');
+            }
+          }
+        }, 3000);
+      });
+      
+      // 스크립트 로드 모니터링
+      let scriptLoadAttempts = 0;
+      const monitorScriptLoad = () => {
+        scriptLoadAttempts++;
+        console.log(`📊 스크립트 로드 모니터링 #${scriptLoadAttempts}`);
+        
+        if (window.naver?.maps?.Map) {
+          console.log('✅ 모니터링으로 API 감지!');
+          window.forceNaverReady();
+          return;
+        }
+        
+        if (scriptLoadAttempts < 30) { // 최대 15초
+          setTimeout(monitorScriptLoad, 500);
+        } else {
+          console.error('❌ 스크립트 로드 모니터링 타임아웃');
+        }
+      };
+      
+      // 모니터링 시작
+      setTimeout(monitorScriptLoad, 500);
+    </script>
+    
+    <!-- 네이버 지도 API 로드 -->
+    <script 
+      type="text/javascript" 
+      src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=9j0o3701nw&callback=initNaverMaps"
+      onload="console.log('📁 스크립트 태그 onload 이벤트');"
+      onerror="console.error('❌ 스크립트 로드 오류');"
+    ></script>
+  </body>
+</html>

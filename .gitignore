@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+venv/
+env/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Build outputs
+build/
+dist/
+
+# Database
+*.db
+*.sqlite
+
+# Uploads
+uploads/videos/*
+uploads/analysis_results/*
+!uploads/videos/.gitkeep
+!uploads/analysis_results/.gitkeep
+
+# AI Models (용량이 큰 경우)
+*.pt
+*.onnx
+*.h5
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage reports
+coverage/
+.nyc_output/
